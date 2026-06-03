@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css');
+
+* {
+  box-sizing: border-box;
+}
+
+/* ── DARK THEME (default) ── */
+:root {
+  --bg: #0f0f11;
+  --bg2: #161618;
+  --surface: #1c1c1f;
+  --surface2: #242428;
+  --surface3: #2a2a2f;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e8ea;
+  --text2: #888;
+  --text3: #555;
+  --purple: #7F77DD;
+  --purple-light: rgba(127,119,221,0.15);
+  --purple-mid: #534AB7;
+  --purple-muted: rgba(127,119,221,0.4);
+  --green: #1D9E75;
+  --green-light: rgba(29,158,117,0.15);
+  --amber: #EF9F27;
+  --amber-light: rgba(239,159,39,0.15);
+  --blue: #378ADD;
+  --blue-light: rgba(55,138,221,0.15);
+  --red-light: rgba(226,75,74,0.15);
+  --red: #E24B4A;
+  --success-light: rgba(99,153,34,0.18);
+  --success: #97C459;
+}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --bg: #f5f4f0;
+  --bg2: #eeecea;
+  --surface: #ffffff;
+  --surface2: #f9f9f8;
+  --surface3: #f3f3f0;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.12);
+  --text: #1a1a1a;
+  --text2: #666;
+  --text3: #aaa;
+  --purple: #534AB7;
+  --purple-light: #EEEDFE;
+  --purple-mid: #7F77DD;
+  --purple-muted: #AFA9EC;
+  --green: #0F6E56;
+  --green-light: #E1F5EE;
+  --amber: #854F0B;
+  --amber-light: #FAEEDA;
+  --blue: #185FA5;
+  --blue-light: #E6F1FB;
+  --red-light: #FCEBEB;
+  --red: #A32D2D;
+  --success-light: #EAF3DE;
+  --success: #3B6D11;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  transition: background 0.3s, color 0.3s;
+}
