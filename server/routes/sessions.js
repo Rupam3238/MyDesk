@@ -3,20 +3,25 @@ import { Session } from '../models/Session.js';
 
 const router = express.Router();
 
-// Create new session
+
+// =====================================================
+// CREATE SESSION
+// =====================================================
 router.post('/', async (req, res) => {
   try {
-    const { topic, category, goal, duration } = req.body;
+    const { topic, category, goal, planned_duration } = req.body;
 
     if (!topic || !category) {
-      return res.status(400).json({ error: 'Topic and category are required' });
+      return res.status(400).json({
+        error: 'Topic and category are required'
+      });
     }
 
     const session = await Session.create({
       topic,
       category,
       goal,
-      duration: duration || 1500, // 25 minutes default
+      planned_duration: planned_duration || 1500
     });
 
     res.status(201).json(session);
@@ -26,7 +31,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all sessions
+
+// =====================================================
+// GET ALL SESSIONS
+// =====================================================
 router.get('/', async (req, res) => {
   try {
     const sessions = await Session.getAll();
@@ -37,7 +45,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get today's sessions
+
+// =====================================================
+// GET TODAY SESSIONS
+// =====================================================
 router.get('/today', async (req, res) => {
   try {
     const sessions = await Session.getAllToday();
@@ -48,23 +59,15 @@ router.get('/today', async (req, res) => {
   }
 });
 
-// Get session stats
-router.get('/stats/:period', async (req, res) => {
-  try {
-    const { period } = req.params;
-    const stats = await Session.getStats(period);
-    res.json(stats || { totalSessions: 0, totalTime: 0, avgFocusScore: 0 });
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Failed to fetch stats' });
-  }
-});
 
-// Get single session
+// =====================================================
+// GET SINGLE SESSION
+// =====================================================
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const session = await Session.getById(id);
+
+    const session = await Session.getSessionWithEvents(id);
 
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
@@ -77,18 +80,20 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Update session
+
+// =====================================================
+// UPDATE SESSION (metadata only)
+// =====================================================
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { topic, category, goal, notes, interruptions } = req.body;
+
+    const { topic, category, goal } = req.body;
 
     const session = await Session.update(id, {
       topic,
       category,
-      goal,
-      notes,
-      interruptions,
+      goal
     });
 
     if (!session) {
@@ -102,13 +107,15 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Complete session (stop timer, save elapsed time and focus score)
+
+// =====================================================
+// COMPLETE SESSION
+// =====================================================
 router.post('/:id/complete', async (req, res) => {
   try {
     const { id } = req.params;
-    const { elapsedTime, focusScore } = req.body;
 
-    const session = await Session.complete(id, elapsedTime, focusScore || 0);
+    const session = await Session.complete(id);
 
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
@@ -121,15 +128,124 @@ router.post('/:id/complete', async (req, res) => {
   }
 });
 
-// Delete session
-router.delete('/:id', async (req, res) => {
+
+// =====================================================
+// ABANDON SESSION
+// =====================================================
+router.post('/:id/abandon', async (req, res) => {
   try {
     const { id } = req.params;
-    await Session.delete(id);
-    res.json({ message: 'Session deleted' });
+
+    const session = await Session.abandon(id);
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    res.json(session);
   } catch (error) {
-    console.error('Error deleting session:', error);
-    res.status(500).json({ error: 'Failed to delete session' });
+    console.error('Error abandoning session:', error);
+    res.status(500).json({ error: 'Failed to abandon session' });
+  }
+});
+
+
+// =====================================================
+// SESSION EVENTS (NEW CORE LAYER)
+// =====================================================
+
+// Add event (pause, resume, note, etc.)
+router.post('/:id/events', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { event_type, metadata } = req.body;
+
+    if (!event_type) {
+      return res.status(400).json({
+        error: 'event_type is required'
+      });
+    }
+
+    const event = await Session.addEvent(
+      id,
+      event_type,
+      metadata || {}
+    );
+
+    res.status(201).json(event);
+  } catch (error) {
+    console.error('Error adding event:', error);
+    res.status(500).json({ error: 'Failed to add event' });
+  }
+});
+
+
+// Get all events for session
+router.get('/:id/events', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const events = await Session.getEvents(id);
+
+    res.json(events);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ error: 'Failed to fetch events' });
+  }
+});
+
+
+// =====================================================
+// ANALYTICS (NO USER LAYER)
+// =====================================================
+
+// Today stats
+router.get('/stats/today', async (req, res) => {
+  try {
+    const stats = await Session.getStatsToday();
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
+
+// Week stats
+router.get('/stats/week', async (req, res) => {
+  try {
+    const stats = await Session.getStatsWeek();
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
+
+// Heatmap
+router.get('/analytics/heatmap', async (req, res) => {
+  try {
+    const data = await Session.getActivityHeatmap();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching heatmap:', error);
+    res.status(500).json({ error: 'Failed to fetch heatmap' });
+  }
+});
+
+
+// By category
+router.get('/category/:category', async (req, res) => {
+  try {
+    const { category } = req.params;
+
+    const sessions = await Session.getByCategory(category);
+
+    res.json(sessions);
+  } catch (error) {
+    console.error('Error fetching category sessions:', error);
+    res.status(500).json({ error: 'Failed to fetch category sessions' });
   }
 });
 

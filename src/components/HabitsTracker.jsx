@@ -1,10 +1,10 @@
 export default function HabitsTracker() {
   const habits = [
-    { id: 1, name: 'Study session', icon: 'ti-book', color: 'purple', streak: '11d', days: [true, true, true, true, true, true, false] },
-    { id: 2, name: 'Exercise', icon: 'ti-run', color: 'green', streak: '5d', days: [true, false, true, true, true, true, false] },
-    { id: 3, name: 'Journal', icon: 'ti-pencil', color: 'amber', streak: '3d', days: [true, true, false, false, true, true, false] },
-    { id: 4, name: 'Drink water', icon: 'ti-droplet', color: 'blue', streak: '7d', days: [true, true, true, true, true, true, false] },
-    { id: 5, name: 'Sleep by 11pm', icon: 'ti-moon', color: 'purple-muted', streak: '2d', days: [false, true, false, true, true, false, false] },
+    { id: 1, name: 'Study session', icon: 'ti-book', color: 'purple', streak: '11d', days: [false, false, false, false, false, false, false] },
+    { id: 2, name: 'Exercise', icon: 'ti-run', color: 'green', streak: '5d', days: [false, false, false, false, false, false, false] },
+    { id: 3, name: 'Journal', icon: 'ti-pencil', color: 'amber', streak: '3d', days: [false, false, false, false, false, false, false] },
+    { id: 4, name: 'Drink water', icon: 'ti-droplet', color: 'blue', streak: '7d', days: [false, false, false, false, false, false, false] },
+    { id: 5, name: 'Sleep by 11pm', icon: 'ti-moon', color: 'purple-muted', streak: '2d', days: [false, false, false, false, false, false, false] },
   ]
 
   return (
