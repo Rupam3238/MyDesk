@@ -128,6 +128,29 @@ export class Session {
   }
 
   // =====================================================
+  // CALCULATE FOCUS SCORE
+  // =====================================================
+  static async calculateFocusScore(id, actualDuration) {
+    const session = await this.getById(id);
+    if (!session) return 0;
+
+    const plannedDuration = session.planned_duration;
+
+    // Get pause count (interruptions)
+    const events = await this.getEvents(id);
+    const pauseCount = events.filter(e => e.event_type === 'pause').length;
+
+    // Formula: (actual / planned) * 100 - (pauses * 5)
+    let focusScore = (actualDuration / plannedDuration) * 100;
+    focusScore = focusScore - (pauseCount * 5);
+
+    // Cap at 100, floor at 0
+    focusScore = Math.max(0, Math.min(100, Math.round(focusScore)));
+
+    return focusScore;
+  }
+
+  // =====================================================
   // COMPLETE SESSION (DERIVED FROM RAW TIME RANGE)
   // =====================================================
   static async complete(id) {
@@ -143,14 +166,27 @@ export class Session {
       (completedAt - createdAt) / 1000
     );
 
+    // Calculate focus score
+    const focusScore = await this.calculateFocusScore(id, actual_duration);
+
+    console.log({
+      actual_duration,
+      focusScore
+    });
+    
+    // Update sessionf
     await dbRun(
       `UPDATE sessions
        SET status = 'completed',
            actual_duration = ?,
+           focus_score = ?,
            completed_at = ?
        WHERE id = ?`,
-      [actual_duration, now, id]
+      [actual_duration, focusScore, now, id]
     );
+
+    // Add completion event
+    await this.addEvent(id, 'complete', {});
 
     return this.getById(id);
   }
@@ -168,20 +204,25 @@ export class Session {
       (abandonedAt - createdAt) / 1000
     );
 
+    // Abandoned session has 0 focus score
     await dbRun(
       `UPDATE sessions
        SET status = 'abandoned',
            actual_duration = ?,
+           focus_score = 0,
            completed_at = ?
        WHERE id = ?`,
       [actual_duration, now, id]
     );
 
+    // Add abandon event
+    await this.addEvent(id, 'abandon', {});
+
     return this.getById(id);
   }
 
   // =====================================================
-  // ANALYTICS (LIGHTWEIGHT - STILL SESSION-BASED)
+  // ANALYTICS (LIGHTWEIGHT - SESSION-BASED)
   // =====================================================
 
   static async getStatsToday() {
@@ -191,7 +232,8 @@ export class Session {
       `SELECT
         COUNT(*) as total_sessions,
         SUM(actual_duration) as total_focus_time,
-        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count
+        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
+        AVG(CASE WHEN status = 'completed' THEN focus_score ELSE NULL END) as avg_focus_score
        FROM sessions
        WHERE DATE(created_at) = ?`,
       [today]
@@ -200,7 +242,8 @@ export class Session {
     return {
       total_sessions: result.total_sessions || 0,
       total_focus_time: result.total_focus_time || 0,
-      completed_count: result.completed_count || 0
+      completed_count: result.completed_count || 0,
+      avg_focus_score: result.avg_focus_score ? Math.round(result.avg_focus_score) : 0
     };
   }
 
@@ -213,7 +256,8 @@ export class Session {
       `SELECT
         COUNT(*) as total_sessions,
         SUM(actual_duration) as total_focus_time,
-        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count
+        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
+        AVG(CASE WHEN status = 'completed' THEN focus_score ELSE NULL END) as avg_focus_score
        FROM sessions
        WHERE DATE(created_at) >= ?`,
       [weekAgo]
@@ -222,7 +266,8 @@ export class Session {
     return {
       total_sessions: result.total_sessions || 0,
       total_focus_time: result.total_focus_time || 0,
-      completed_count: result.completed_count || 0
+      completed_count: result.completed_count || 0,
+      avg_focus_score: result.avg_focus_score ? Math.round(result.avg_focus_score) : 0
     };
   }
 
@@ -235,7 +280,8 @@ export class Session {
       `SELECT
         DATE(created_at) as date,
         SUM(actual_duration) as total_duration,
-        COUNT(*) as session_count
+        COUNT(*) as session_count,
+        AVG(focus_score) as avg_focus_score
        FROM sessions
        WHERE status = 'completed'
          AND DATE(created_at) >= ?
@@ -255,7 +301,7 @@ export class Session {
   }
 
   // =====================================================
-  // SESSION + EVENTS VIEW (IMPORTANT FOR FRONTEND)
+  // SESSION + EVENTS VIEW
   // =====================================================
 
   static async getSessionWithEvents(id) {

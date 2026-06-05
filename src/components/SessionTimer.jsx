@@ -1,185 +1,428 @@
 import { useState, useEffect } from 'react'
-import {
-  createSession,
-  completeSession,
-} from '../api/sessions'
+import SessionModal from './SessionModal'
+import './SessionTimer.css'
 
 export default function SessionTimer() {
-  const [totalSecs] = useState(25 * 60)
-  const [remainSecs, setRemainSecs] = useState(25 * 60)
-  const [running, setRunning] = useState(true)
-
-  const [sessionId, setSessionId] = useState(null)
+  const [sessionData, setSessionData] = useState(null)
+  const [showModal, setShowModal] = useState(false)
+  const [elapsedSecs, setElapsedSecs] = useState(0)
+  const [running, setRunning] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const [focusScore, setFocusScore] = useState(null)
+  const [earlierSessions, setEarlierSessions] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  // Create session when component loads
+  // Initialize: Check for active session or show modal
   useEffect(() => {
-    const startSession = async () => {
+    const initializeSession = async () => {
       try {
-        const session = await createSession({
-          topic: 'React Hooks',
-          category: 'Coding',
-          goal: 'Study React Hooks',
-          duration: totalSecs,
-        })
+        // Fetch today's sessions to check if any are active
+        const response = await fetch('http://localhost:5000/api/sessions/today')
+        if (!response.ok) throw new Error('Failed to fetch sessions')
 
-        setSessionId(session.id)
+        const sessions = await response.json()
+        const activeSession = sessions.find(s => s.status === 'active')
 
-        console.log('Session created:', session.id)
+        if (activeSession) {
+          setSessionData(activeSession)
+          setElapsedSecs(0)
+          setRunning(true)
+        } else {
+          setSessionData(null)
+          fetchEarlierSessions()
+        }
       } catch (err) {
-        console.error('Failed to create session:', err)
+        console.error('Error initializing session:', err)
+        setShowModal(true)
       }
     }
 
-    startSession()
-  }, [totalSecs])
+    initializeSession()
+  }, [])
 
-  // Timer logic
+  // Fetch earlier today's sessions
+  const fetchEarlierSessions = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/sessions/today')
+      if (!response.ok) throw new Error('Failed to fetch sessions')
+
+      const sessions = await response.json()
+      // Filter to only completed sessions, exclude current active one
+      const earlier = sessions
+        .filter(s => s.status === 'completed')
+        .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))
+
+      setEarlierSessions(earlier)
+    } catch (err) {
+      console.error('Error fetching earlier sessions:', err)
+    }
+  }
+
+  // Handle new session creation from modal
+  const handleSessionCreate = (newSession) => {
+    setSessionData(newSession)
+    setElapsedSecs(0)
+    setShowModal(false)
+    setRunning(true)
+    setCompleted(false)
+    setFocusScore(null)
+    setError('')
+  }
+
+  // Timer interval
   useEffect(() => {
-    if (!running) return
-    if (remainSecs <= 0) return
+    if (!running || !sessionData || completed) return
 
     const interval = setInterval(() => {
-      setRemainSecs(prev => {
-        if (prev <= 1) {
-          clearInterval(interval)
-          return 0
-        }
-
-        return prev - 1
-      })
+      setElapsedSecs(prev => prev + 1)
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [running, remainSecs])
+  }, [running, sessionData, completed])
 
-  // Complete session when timer reaches 0
-  useEffect(() => {
-    if (remainSecs !== 0) return
-    if (!sessionId) return
-    if (completed) return
+  // Handle pause/resume events
+  const handlePauseResume = async () => {
+    if (!sessionData) return
 
-    const finishSession = async () => {
-      try {
-        await completeSession(sessionId, {
-          elapsedTime: totalSecs,
-          focusScore: 100,
-        })
+    setLoading(true)
+    try {
+      const eventType = running ? 'pause' : 'resume'
 
-        setCompleted(true)
+      const response = await fetch(
+        `http://localhost:5000/api/sessions/${sessionData.id}/events`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_type: eventType }),
+        }
+      )
+
+      if (!response.ok) throw new Error(`Failed to ${eventType} session`)
+
+      if (eventType === 'pause') {
         setRunning(false)
-
-        console.log('Session completed')
-      } catch (err) {
-        console.error('Failed to complete session:', err)
+        setIsPaused(true)
+      } else {
+        setRunning(true)
+        setIsPaused(false)
       }
+    } catch (err) {
+      setError(err.message || 'Failed to update session')
+      console.error('Error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle complete session
+  const handleComplete = async () => {
+    if (!sessionData) return
+
+    setLoading(true)
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/sessions/${sessionData.id}/complete`,
+        { method: 'POST' }
+      )
+
+      if (!response.ok) throw new Error('Failed to complete session')
+
+      const completedSession = await response.json()
+      setSessionData(completedSession)
+      setCompleted(true)
+      setRunning(false)
+      setFocusScore(completedSession.focus_score)
+      fetchEarlierSessions()
+    } catch (err) {
+      setError(err.message || 'Failed to complete session')
+      console.error('Error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle abandon session
+  const handleAbandon = async () => {
+    if (!sessionData) return
+
+    const confirmed = window.confirm(
+      'Are you sure? This session will be marked as abandoned with 0 focus score.'
+    )
+
+    if (!confirmed) return
+
+    setLoading(true)
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/sessions/${sessionData.id}/abandon`,
+        { method: 'POST' }
+      )
+
+      if (!response.ok) throw new Error('Failed to abandon session')
+
+      const abandonedSession = await response.json()
+      setSessionData(abandonedSession)
+      setCompleted(true)
+      setRunning(false)
+      setFocusScore(0)
+      fetchEarlierSessions()
+    } catch (err) {
+      setError(err.message || 'Failed to abandon session')
+      console.error('Error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle new session (reset to show modal)
+  const handleNewSession = () => {
+    setSessionData(null)
+    setShowModal(true)
+    setCompleted(false)
+    setFocusScore(null)
+    setElapsedSecs(0)
+    setRunning(false)
+    setIsPaused(false)
+    setError('')
+  }
+
+  // Format time display
+  const formatTime = (secs) => {
+    const hours = Math.floor(secs / 3600)
+    const mins = Math.floor((secs % 3600) / 60)
+    const sec = secs % 60
+
+    if (hours > 0) {
+      return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
     }
 
-    finishSession()
-  }, [remainSecs, sessionId, completed, totalSecs])
+    return `${String(mins).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+  }
 
-  const mins = Math.floor(remainSecs / 60)
-  const secs = remainSecs % 60
+  // Format duration for display
+  const formatDuration = (seconds) => {
+    const hours = Math.floor(seconds / 3600)
+    const mins = Math.floor((seconds % 3600) / 60)
 
-  const displayTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+    if (hours > 0) {
+      return `${hours}h ${mins}m`
+    }
+    return `${mins}m`
+  }
 
-  const progress = Math.round(
-    ((totalSecs - remainSecs) / totalSecs) * 100
-  )
+  // Calculate progress
+  const progress = sessionData
+    ? Math.min(
+        (elapsedSecs / sessionData.planned_duration) * 100,
+        100
+      )
+    : 0
 
+if (!sessionData) {
   return (
-    <div className="card">
+    <>
+      <SessionModal
+        isOpen={showModal}
+        onSessionCreate={handleSessionCreate}
+        onClose={() => setShowModal(false)}
+      />
+
+      <div className="card timer-card">
+        <div className="card-header">
+          <div className="card-title">
+            <i className="ti ti-clock"></i>
+            Study Session
+          </div>
+        </div>
+
+        <div className="timer-wrap">
+          <div className="timer-num">
+            00:00
+          </div>
+
+          <div className="timer-controls">
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowModal(true)}
+            >
+              <i className="ti ti-player-play"></i>
+              <span>Start Session</span>
+            </button>
+          </div>
+
+          {earlierSessions.length > 0 && (
+            <div className="slog">
+              <div className="slog-label">earlier today</div>
+
+              {earlierSessions.slice(0, 3).map(session => (
+                <div key={session.id} className="s-row">
+                  <div className="s-dot s-dot-g"></div>
+                  <span>{session.topic}</span>
+                  <div className="s-time">
+                    {formatDuration(session.actual_duration)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  )
+}
+
+  // Session in progress or completed
+return (
+  <>
+    <SessionModal
+      isOpen={showModal}
+      onSessionCreate={handleSessionCreate}
+      onClose={() => setShowModal(false)}
+    />
+    <div className="card timer-card">
       <div className="card-header">
         <div className="card-title">
           <i className="ti ti-clock"></i>
           Study Session
         </div>
-
         <div className="btn-row">
           <span className="tag tag-p">
-            Pomodoro · 25m
+            {formatDuration(sessionData.planned_duration)} committed
           </span>
         </div>
       </div>
 
       <div className="timer-wrap">
-        <div className="timer-tags">
-          <span className="tag tag-p">
-            React Hooks
-          </span>
-
-          <span className="tag tag-gray">
-            Session 3 of 4
-          </span>
+        {/* Session Info */}
+        <div className="session-info">
+          <div className="session-topic">{sessionData.topic}</div>
+          <div className="session-meta">
+            <span className="tag tag-p">{sessionData.category}</span>
+            {sessionData.goal && (
+              <span className="tag tag-gray">{sessionData.goal}</span>
+            )}
+          </div>
         </div>
 
-        <div className="timer-num">
-          {displayTime}
-        </div>
+        {/* Timer Display */}
+        {!completed ? (
+          <>
+            <div className="timer-num">
+              {formatTime(elapsedSecs)}
+            </div>
 
-        <div className="timer-pb-bg">
-          <div
-            className="timer-pb"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
+            <div className="timer-pb-bg">
+              <div
+                className="timer-pb"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
 
-        <div className="timer-controls">
-          <button className="btn btn-ghost btn-icon">
-            <i className="ti ti-player-skip-back"></i>
-          </button>
+            {/* Controls */}
+            <div className="timer-controls">
+              <button
+                className="btn btn-ghost btn-icon"
+                onClick={handleAbandon}
+                disabled={loading}
+                title="Abandon session"
+              >
+                <i className="ti ti-x"></i>
+              </button>
 
-          <button
-            className="btn btn-primary"
-            onClick={() => setRunning(!running)}
-            disabled={completed}
-          >
-            <i
-              className={`ti ${
-                running
-                  ? 'ti-player-pause'
-                  : 'ti-player-play'
-              }`}
-            ></i>
+              <button
+                className="btn btn-primary"
+                onClick={handlePauseResume}
+                disabled={loading}
+              >
+                <i
+                  className={`ti ${
+                    running ? 'ti-player-pause' : 'ti-player-play'
+                  }`}
+                ></i>
+                <span>{running ? 'Pause' : 'Resume'}</span>
+              </button>
 
-            <span>
-              {running ? 'Pause' : 'Resume'}
-            </span>
-          </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleComplete}
+                disabled={loading}
+                style={{ flex: 1 }}
+              >
+                <i className="ti ti-check"></i>
+                <span>Complete</span>
+              </button>
+            </div>
 
-          <button className="btn btn-ghost btn-icon">
-            <i className="ti ti-player-skip-forward"></i>
-          </button>
+            {/* Paused indicator */}
+            {isPaused && (
+              <div className="paused-banner">
+                <i className="ti ti-player-pause"></i>
+                <span>Session paused</span>
+              </div>
+            )}
+          </>
+        ) : (
+          /* Completion Screen */
+          <div className="completion-screen">
+            <div className="completion-icon">
+              <i className="ti ti-check"></i>
+            </div>
+            <div className="completion-title">Session Complete!</div>
 
-          <button className="btn btn-ghost btn-icon">
-            <i className="ti ti-refresh"></i>
-          </button>
-        </div>
-      </div>
+            <div className="completion-stats">
+              <div className="stat">
+                <div className="stat-label">Duration</div>
+                <div className="stat-value">
+                  {formatDuration(sessionData.actual_duration)}
+                </div>
+              </div>
 
-      <div className="slog">
-        <div className="slog-label">
-          earlier today
-        </div>
+              <div className="stat">
+                <div className="stat-label">Focus Score</div>
+                <div className="stat-value focus-score">
+                  {focusScore}
+                </div>
+              </div>
 
-        <div className="s-row">
-          <div className="s-dot"></div>
-          JS Promises &amp; async/await
-          <div className="s-time">25m</div>
-        </div>
+              <div className="stat">
+                <div className="stat-label">vs Planned</div>
+                <div className="stat-value">
+                  {formatDuration(sessionData.planned_duration)}
+                </div>
+              </div>
+            </div>
 
-        <div className="s-row">
-          <div className="s-dot"></div>
-          useEffect deep dive
-          <div className="s-time">25m</div>
-        </div>
+            <button
+              className="btn btn-primary"
+              onClick={handleNewSession}
+              style={{ width: '100%' }}
+            >
+              <i className="ti ti-plus"></i>
+              New Session
+            </button>
+          </div>
+        )}
 
-        <div className="s-row">
-          <div className="s-dot s-dot-g"></div>
-          Break
-          <div className="s-time">5m</div>
-        </div>
+        {/* Error Message */}
+        {error && <div className="error-message">{error}</div>}
+
+        {/* Earlier Today Section */}
+        {earlierSessions.length > 0 && (
+          <div className="slog">
+            <div className="slog-label">earlier today</div>
+            {earlierSessions.slice(0, 3).map(session => (
+              <div key={session.id} className="s-row">
+                <div className="s-dot s-dot-g"></div>
+                <span>{session.topic}</span>
+                <div className="s-time">{formatDuration(session.actual_duration)}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
+  </>
   )
 }

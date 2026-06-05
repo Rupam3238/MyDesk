@@ -1,0 +1,263 @@
+.timer-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.timer-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Session Info */
+.session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface2);
+  border-radius: 8px;
+}
+
+.session-topic {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.session-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Timer Display */
+.timer-num {
+  font-size: 56px;
+  font-weight: 500;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+  text-align: center;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.timer-pb-bg {
+  height: 3px;
+  background: var(--surface3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.timer-pb {
+  height: 3px;
+  background: var(--purple);
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Controls */
+.timer-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.timer-controls .btn {
+  flex: 1;
+  max-width: 120px;
+}
+
+.timer-controls .btn-icon {
+  flex: 0;
+  width: 40px;
+  padding: 8px;
+}
+
+/* Paused Banner */
+.paused-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--amber-light);
+  border-radius: 8px;
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.paused-banner i {
+  font-size: 14px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Completion Screen */
+.completion-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.completion-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--green-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: var(--green);
+}
+
+.completion-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.completion-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.stat {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+}
+
+.stat-value.focus-score {
+  color: var(--green);
+}
+
+/* Earlier Sessions */
+.earlier-sessions-sidebar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 280px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.earlier-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 12px;
+}
+
+.earlier-row:last-child {
+  border-bottom: none;
+}
+
+.earlier-topic {
+  color: var(--text);
+  flex: 1;
+}
+
+.earlier-time {
+  color: var(--text3);
+  font-size: 11px;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+/* Error Message */
+.error-message {
+  padding: 10px 12px;
+  background: var(--red-light);
+  border-radius: 8px;
+  color: var(--red);
+  font-size: 12px;
+  border: 0.5px solid var(--red-light);
+}
+
+/* Tags */
+.tag {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 99px;
+}
+
+.tag-p {
+  background: var(--purple-light);
+  color: var(--purple);
+}
+
+.tag-gray {
+  background: var(--surface3);
+  color: var(--text3);
+}
+
+/* Session Log */
+.slog {
+  margin-top: 12px;
+  border-top: 0.5px solid var(--border);
+  padding-top: 10px;
+}
+
+.slog-label {
+  font-size: 10px;
+  color: var(--text3);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.s-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  padding: 6px 0;
+}
+
+.s-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple-muted);
+  flex-shrink: 0;
+}
+
+.s-dot-g {
+  background: var(--green);
+}
+
+.s-time {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text3);
+}

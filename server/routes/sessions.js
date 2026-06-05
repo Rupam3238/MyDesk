@@ -1,8 +1,7 @@
 import express from 'express';
-import { Session } from '../models/Session.js';
+import { Session } from '../models/session.js';
 
 const router = express.Router();
-
 
 // =====================================================
 // CREATE SESSION
@@ -11,9 +10,9 @@ router.post('/', async (req, res) => {
   try {
     const { topic, category, goal, planned_duration } = req.body;
 
-    if (!topic || !category) {
+    if (!topic || !category || !planned_duration) {
       return res.status(400).json({
-        error: 'Topic and category are required'
+        error: 'Topic, category, and planned_duration are required'
       });
     }
 
@@ -21,7 +20,7 @@ router.post('/', async (req, res) => {
       topic,
       category,
       goal,
-      planned_duration: planned_duration || 1500
+      planned_duration
     });
 
     res.status(201).json(session);
@@ -30,7 +29,6 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to create session' });
   }
 });
-
 
 // =====================================================
 // GET ALL SESSIONS
@@ -45,7 +43,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-
 // =====================================================
 // GET TODAY SESSIONS
 // =====================================================
@@ -59,14 +56,12 @@ router.get('/today', async (req, res) => {
   }
 });
 
-
 // =====================================================
-// GET SINGLE SESSION
+// GET SINGLE SESSION WITH EVENTS
 // =====================================================
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-
     const session = await Session.getSessionWithEvents(id);
 
     if (!session) {
@@ -80,14 +75,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
 // =====================================================
 // UPDATE SESSION (metadata only)
 // =====================================================
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-
     const { topic, category, goal } = req.body;
 
     const session = await Session.update(id, {
@@ -107,9 +100,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-
 // =====================================================
-// COMPLETE SESSION
+// COMPLETE SESSION (with focus score calculation)
 // =====================================================
 router.post('/:id/complete', async (req, res) => {
   try {
@@ -127,7 +119,6 @@ router.post('/:id/complete', async (req, res) => {
     res.status(500).json({ error: 'Failed to complete session' });
   }
 });
-
 
 // =====================================================
 // ABANDON SESSION
@@ -149,12 +140,11 @@ router.post('/:id/abandon', async (req, res) => {
   }
 });
 
-
 // =====================================================
-// SESSION EVENTS (NEW CORE LAYER)
+// SESSION EVENTS
 // =====================================================
 
-// Add event (pause, resume, note, etc.)
+// ADD EVENT (pause, resume, note, etc.)
 router.post('/:id/events', async (req, res) => {
   try {
     const { id } = req.params;
@@ -166,12 +156,7 @@ router.post('/:id/events', async (req, res) => {
       });
     }
 
-    const event = await Session.addEvent(
-      id,
-      event_type,
-      metadata || {}
-    );
-
+    const event = await Session.addEvent(id, event_type, metadata || {});
     res.status(201).json(event);
   } catch (error) {
     console.error('Error adding event:', error);
@@ -179,14 +164,11 @@ router.post('/:id/events', async (req, res) => {
   }
 });
 
-
-// Get all events for session
+// GET EVENTS FOR SESSION
 router.get('/:id/events', async (req, res) => {
   try {
     const { id } = req.params;
-
     const events = await Session.getEvents(id);
-
     res.json(events);
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -194,12 +176,10 @@ router.get('/:id/events', async (req, res) => {
   }
 });
 
-
 // =====================================================
-// ANALYTICS (NO USER LAYER)
+// ANALYTICS
 // =====================================================
 
-// Today stats
 router.get('/stats/today', async (req, res) => {
   try {
     const stats = await Session.getStatsToday();
@@ -210,8 +190,6 @@ router.get('/stats/today', async (req, res) => {
   }
 });
 
-
-// Week stats
 router.get('/stats/week', async (req, res) => {
   try {
     const stats = await Session.getStatsWeek();
@@ -222,8 +200,6 @@ router.get('/stats/week', async (req, res) => {
   }
 });
 
-
-// Heatmap
 router.get('/analytics/heatmap', async (req, res) => {
   try {
     const data = await Session.getActivityHeatmap();
@@ -234,14 +210,10 @@ router.get('/analytics/heatmap', async (req, res) => {
   }
 });
 
-
-// By category
 router.get('/category/:category', async (req, res) => {
   try {
     const { category } = req.params;
-
     const sessions = await Session.getByCategory(category);
-
     res.json(sessions);
   } catch (error) {
     console.error('Error fetching category sessions:', error);
