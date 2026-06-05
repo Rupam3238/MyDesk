@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import SessionModal from './SessionModal'
 import './SessionTimer.css'
+import { calculateElapsed } from '../utils/calculateElapsed'
 
 export default function SessionTimer() {
   const [sessionData, setSessionData] = useState(null)
@@ -27,11 +28,19 @@ export default function SessionTimer() {
 
         if (activeSession) {
           setSessionData(activeSession)
-          setElapsedSecs(0)
-          setRunning(true)
-        } else {
-          setSessionData(null)
-          fetchEarlierSessions()
+
+          const elapsed = calculateElapsed(activeSession)
+
+          setElapsedSecs(elapsed)
+
+          const events = activeSession.events || []
+          const lastEvent = events.at(-1)
+
+          const isPaused = lastEvent?.event_type === 'pause'
+          const isRunning = lastEvent?.event_type === 'resume' || (!lastEvent)
+
+          setIsPaused(isPaused)
+          setRunning(isRunning)
         }
       } catch (err) {
         console.error('Error initializing session:', err)
@@ -233,7 +242,7 @@ if (!sessionData) {
         <div className="card-header">
           <div className="card-title">
             <i className="ti ti-clock"></i>
-            Study Session
+            Sessions
           </div>
         </div>
 
@@ -285,26 +294,39 @@ return (
       <div className="card-header">
         <div className="card-title">
           <i className="ti ti-clock"></i>
-          Study Session
-        </div>
-        <div className="btn-row">
-          <span className="tag tag-p">
-            {formatDuration(sessionData.planned_duration)} committed
-          </span>
+          {sessionData?.category || 'Session'} Session
         </div>
       </div>
 
       <div className="timer-wrap">
         {/* Session Info */}
-        <div className="session-info">
-          <div className="session-topic">{sessionData.topic}</div>
-          <div className="session-meta">
-            <span className="tag tag-p">{sessionData.category}</span>
+        <div className="session-header-row">
+
+          {/* LEFT: committed time (loudest) */}
+          <div className="header-left">
+            <span className="badge badge-commit">
+              ⌛ {formatDuration(sessionData.planned_duration)}
+            </span>
+          </div>
+
+          {/* CENTER: topic (quiet) */}
+          <div className="header-center">
+            <div className="session-topic-quiet">
+              {sessionData.topic}
+            </div>
+          </div>
+
+          {/* RIGHT: goal (highlighted) */}
+          <div className="header-right">
             {sessionData.goal && (
-              <span className="tag tag-gray">{sessionData.goal}</span>
+              <span className="badge badge-goal-soft">
+                {sessionData.goal}
+              </span>
             )}
           </div>
+
         </div>
+        
 
         {/* Timer Display */}
         {!completed ? (
