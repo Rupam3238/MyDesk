@@ -19,28 +19,34 @@ export default function SessionTimer() {
   useEffect(() => {
     const initializeSession = async () => {
       try {
-        // Fetch today's sessions to check if any are active
-        const response = await fetch('http://localhost:5000/api/sessions/today')
-        if (!response.ok) throw new Error('Failed to fetch sessions')
+        // Step 1: Fetch today's sessions to find active one
+        const todayResponse = await fetch('http://localhost:5000/api/sessions/today')
+        if (!todayResponse.ok) throw new Error('Failed to fetch sessions')
 
-        const sessions = await response.json()
+        const sessions = await todayResponse.json()
         const activeSession = sessions.find(s => s.status === 'active')
 
         if (activeSession) {
-          setSessionData(activeSession)
+          // Step 2: Fetch the full session WITH EVENTS using the session ID
+          const detailResponse = await fetch(`http://localhost:5000/api/sessions/${activeSession.id}`)
+          if (!detailResponse.ok) throw new Error('Failed to fetch session details')
 
-          const elapsed = calculateElapsed(activeSession)
+          const sessionWithEvents = await detailResponse.json()
+          setSessionData(sessionWithEvents)
 
+          // Step 3: Calculate elapsed time using events
+          const elapsed = calculateElapsed(sessionWithEvents)
           setElapsedSecs(elapsed)
 
-          const events = activeSession.events || []
+          // Step 4: Restore pause state from events
+          const events = sessionWithEvents.events || []
           const lastEvent = events.at(-1)
 
-          const isPaused = lastEvent?.event_type === 'pause'
-          const isRunning = lastEvent?.event_type === 'resume' || (!lastEvent)
+          const wasPaused = lastEvent?.event_type === 'pause'
+          const shouldBeRunning = lastEvent?.event_type === 'resume' || (!lastEvent)
 
-          setIsPaused(isPaused)
-          setRunning(isRunning)
+          setIsPaused(wasPaused)
+          setRunning(shouldBeRunning && !wasPaused)
         }
       } catch (err) {
         console.error('Error initializing session:', err)
