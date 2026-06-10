@@ -576,6 +576,7 @@
 .notes-body {
   display: flex;
   flex-direction: column;
+  height: 270px; /* reduced panel height */
 }
 
 .notes-controls {
@@ -660,8 +661,10 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 420px;
+  flex: 1; /* fill remaining space */
+  max-height: none;
   overflow-y: auto;
+  padding-right: 6px; /* space for scrollbar */
 }
 
 .notes-empty {
@@ -755,6 +758,48 @@
   border-color: var(--purple);
   color: var(--purple);
 }
+
+/* Delete button (hidden until hover) */
+.n-delete {
+  background: transparent;
+  border: none;
+  color: var(--text3);
+  padding: 6px;
+  margin-left: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(0);
+  transition: opacity 0.12s, transform 0.12s;
+}
+
+.n-delete i { font-size: 14px; }
+
+.n-card:hover .n-delete {
+  opacity: 1;
+}
+
+.n-delete:hover { color: var(--red); }
+
+/* Inline delete confirmation */
+.delete-confirm {
+  position: sticky;
+  bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.delete-actions { display: flex; gap: 8px; }
+
+.btn-danger { background: var(--red); color: white; border: none; padding: 8px 10px; border-radius: 6px; }
+
+.btn-ghost { background: transparent; border: 1px solid var(--border2); padding: 8px 10px; border-radius: 6px; }
 
 /* ── Habits ── */
 .h-row {

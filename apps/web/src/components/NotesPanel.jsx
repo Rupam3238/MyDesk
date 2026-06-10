@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { categories } from '../../../../packages/src/categories'
 
-export default function NotesPanel({ notes, onAddNote }) {
+// props: notes, onAddNote, onDeleteNote
+
+export default function NotesPanel({ notes, onAddNote, onDeleteNote }) {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [input, setInput] = useState('')
+  const [deleteCandidate, setDeleteCandidate] = useState(null)
 
   const handleAdd = () => {
     const text = input.trim()
@@ -26,9 +29,6 @@ export default function NotesPanel({ notes, onAddNote }) {
     <div className="card">
       <div className="card-header">
         <div className="card-title"><i className="ti ti-notes"></i>Quick Notes</div>
-        <div className="btn-row">
-          <button className="btn btn-ghost btn-icon"><i className="ti ti-search"></i></button>
-        </div>
       </div>
       <div className="notes-body">
         {/* Input Controls */}
@@ -47,15 +47,12 @@ export default function NotesPanel({ notes, onAddNote }) {
               onKeyPress={handleKeyPress}
               placeholder="What's on your mind..."
             />
-            <button className="btn-add-note" onClick={handleAdd} title="Add note (Enter)">
-              <i className="ti ti-plus"></i>
-            </button>
           </div>
         </div>
 
         {/* Notes List */}
         <div className="notes-list">
-          {filteredNotes.length === 0 ? (
+            {filteredNotes.length === 0 ? (
             <div className="notes-empty">
               <i className="ti ti-inbox"></i>
               <div>No notes yet</div>
@@ -79,10 +76,29 @@ export default function NotesPanel({ notes, onAddNote }) {
                     </div>
                   )}
                 </div>
+                <button
+                  className="n-delete"
+                  title="Delete note"
+                  onClick={() => setDeleteCandidate(note.id)}
+                >
+                  <i className="ti ti-trash"></i>
+                </button>
               </div>
             ))
           )}
         </div>
+        {deleteCandidate && (
+          <div className="delete-confirm">
+            <div>Delete this note?</div>
+            <div className="delete-actions">
+              <button className="btn btn-ghost" onClick={() => setDeleteCandidate(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={async () => {
+                if (typeof onDeleteNote === 'function') await onDeleteNote(deleteCandidate)
+                setDeleteCandidate(null)
+              }}>Delete</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

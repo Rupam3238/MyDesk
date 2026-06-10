@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar'
 import ModeBar from './components/ModeBar'
 import Dashboard from './components/Dashboard'
 import { getAllNotes, createNote } from './api/notes'
+import { deleteNote } from './api/notes'
 
 function App() {
   const [theme, setTheme] = useState('dark')
@@ -33,6 +34,15 @@ function App() {
     }
   }
 
+  const onDeleteNote = async (id) => {
+    try {
+      await deleteNote(id)
+      setNotes(prev => prev.filter(n => n.id !== id))
+    } catch (err) {
+      console.error('Failed to delete note', err)
+    }
+  }
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -53,7 +63,7 @@ function App() {
         <Sidebar />
         <main className="main">
           <ModeBar currentMode={mode} onModeChange={setMode} />
-          <Dashboard mode={mode} notes={notes} onAddNote={addNote} />
+          <Dashboard mode={mode} notes={notes} onAddNote={addNote} onDeleteNote={onDeleteNote} />
         </main>
       </div>
     </div>

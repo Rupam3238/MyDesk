@@ -4,7 +4,7 @@ import NotesPanel from './NotesPanel'
 import HabitsTracker from './HabitsTracker'
 import Quick from './quick';
 
-export default function Dashboard({ mode, notes, onAddNote }) {
+export default function Dashboard({ mode, notes, onAddNote, onDeleteNote }) {
   return (
     <div className="content">
       {/* Deep Work banner */}
@@ -53,7 +53,7 @@ export default function Dashboard({ mode, notes, onAddNote }) {
       {/* Mid row: Timer + Notes */}
       <div className="mid-row">
         <SessionTimer />
-        <NotesPanel notes={notes} onAddNote={onAddNote} />
+        <NotesPanel notes={notes} onAddNote={onAddNote} onDeleteNote={onDeleteNote} />
       </div>
       
       {/* Bottom row: Habits */}

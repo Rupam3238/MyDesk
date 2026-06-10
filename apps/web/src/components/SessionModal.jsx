@@ -109,7 +109,7 @@ export default function SessionModal({ onSessionCreate, isOpen, onClose }) {
         </div>
 
         
-        <form onSubmit={handleSubmit} className="session-modal-form">
+        <form onSubmit={handleSubmit} className="session-modal-form" autoComplete='off'>
           {/* Topic */}
           <div className="form-group">
             <label htmlFor="topic">

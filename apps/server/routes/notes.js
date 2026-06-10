@@ -1,5 +1,5 @@
 import express from 'express';
-import { Note } from '../models/Note.js';
+import { Note } from '../models/note.js';
 
 const router = express.Router();
 
@@ -128,6 +128,11 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const note = await Note.getById(id);
+    if (!note) {
+      return res.status(404).json({ error: 'Note not found' });
+    }
+
     await Note.delete(id);
     res.json({ message: 'Note deleted' });
   } catch (error) {
