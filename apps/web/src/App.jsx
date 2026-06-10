@@ -23,10 +23,10 @@ function App() {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
-  const addNote = async (text) => {
+  const addNote = async (text, category = null) => {
     if (!text.trim()) return
     try {
-      const newNote = await createNote({ content: text.trim(), tags: [], color: 'purple' })
+      const newNote = await createNote({ content: text.trim(), tags: [], color: 'purple', category })
       setNotes(prev => [newNote, ...prev])
     } catch (err) {
       console.error('Failed to create note', err)

@@ -6,7 +6,7 @@ const router = express.Router();
 // Create new note
 router.post('/', async (req, res) => {
   try {
-    const { content, tags, color, sessionId } = req.body;
+    const { content, tags, color, sessionId, category } = req.body;
 
     if (!content) {
       return res.status(400).json({ error: 'Content is required' });
@@ -17,6 +17,7 @@ router.post('/', async (req, res) => {
       tags: tags || [],
       color: color || 'purple',
       sessionId,
+      category,
     });
 
     res.status(201).json(note);
@@ -57,6 +58,18 @@ router.get('/session/:sessionId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching session notes:', error);
     res.status(500).json({ error: 'Failed to fetch session notes' });
+  }
+});
+
+// Get notes by category
+router.get('/category/:category', async (req, res) => {
+  try {
+    const { category } = req.params;
+    const notes = await Note.getByCategory(category);
+    res.json(notes);
+  } catch (error) {
+    console.error('Error fetching category notes:', error);
+    res.status(500).json({ error: 'Failed to fetch category notes' });
   }
 });
 

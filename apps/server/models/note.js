@@ -7,9 +7,17 @@ export class Note {
     const now = new Date().toISOString();
 
     await dbRun(
-      `INSERT INTO notes (id, content, color, session_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, data.content, data.color || 'purple', data.sessionId || data.session_id || null, now, now]
+      `INSERT INTO notes (id, content, color, session_id, category, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.content,
+        data.color || 'purple',
+        data.sessionId || data.session_id || null,
+        data.category || null,
+        now,
+        now
+      ]
     );
 
     if (data.tags && data.tags.length > 0) {
@@ -78,6 +86,25 @@ export class Note {
     const notes = await dbAll(
       'SELECT * FROM notes WHERE session_id = ? ORDER BY created_at DESC',
       [session_id]
+    );
+
+    for (let note of notes) {
+      const tags = await dbAll(
+        `SELECT t.name FROM tags t
+         JOIN note_tags nt ON t.id = nt.tag_id
+         WHERE nt.note_id = ?`,
+        [note.id]
+      );
+      note.tags = tags.map(t => t.name);
+    }
+
+    return notes;
+  }
+
+  static async getByCategory(category) {
+    const notes = await dbAll(
+      `SELECT * FROM notes WHERE category = ? ORDER BY created_at DESC`,
+      [category]
     );
 
     for (let note of notes) {
