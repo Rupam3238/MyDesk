@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import SessionModal from './SessionModal'
-import './SessionTimer.css'
+import '../styles/SessionTimer.css'
 import { calculateElapsed } from '../utils/calculateElapsed'
 
 export default function SessionTimer() {
