@@ -55,6 +55,7 @@ export default function SessionTimer() {
     }
 
     initializeSession()
+    fetchEarlierSessions()
   }, [])
 
   // Fetch earlier today's sessions
@@ -256,6 +257,7 @@ if (!sessionData) {
           <div className="timer-num">
             00:00
           </div>
+          
 
           <div className="timer-controls">
             <button
