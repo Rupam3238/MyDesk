@@ -37,12 +37,13 @@ CREATE TABLE IF NOT EXISTS notes (
 id TEXT PRIMARY KEY,
 content TEXT NOT NULL,
 color TEXT DEFAULT 'purple',
+category TEXT DEFAULT 'Study',
 session_id TEXT,
 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY(session_id) REFERENCES sessions(id)
 );
-
+ 
 -- =====================================================
 -- TAGS
 -- =====================================================

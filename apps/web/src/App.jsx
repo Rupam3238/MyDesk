@@ -4,15 +4,12 @@ import TopBar from './components/TopBar'
 import Sidebar from './components/Sidebar'
 import ModeBar from './components/ModeBar'
 import Dashboard from './components/Dashboard'
+import { getAllNotes, createNote } from './api/notes'
 
 function App() {
   const [theme, setTheme] = useState('dark')
   const [mode, setMode] = useState('overview')
-  const [notes, setNotes] = useState([
-    { id: 1, text: 'useCallback memoizes a function so it doesn\'t re-create on every render — use when passing to child components.', tags: ['React', 'hooks'], color: 'purple' },
-    { id: 2, text: 'Build ugly first. Ship it. Refactor later. Stop redesigning the folder structure.', tags: ['mindset'], color: 'green' },
-    { id: 3, text: 'SQLite stores data in a single file on disk — perfect for local projects. No server needed.', tags: ['backend', 'db'], color: 'amber' },
-  ])
+  const [notes, setNotes] = useState([])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -26,15 +23,28 @@ function App() {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
-  const addNote = (text) => {
+  const addNote = async (text) => {
     if (!text.trim()) return
-    setNotes([...notes, {
-      id: Date.now(),
-      text: text.trim(),
-      tags: [],
-      color: 'purple'
-    }])
+    try {
+      const newNote = await createNote({ content: text.trim(), tags: [], color: 'purple' })
+      setNotes(prev => [newNote, ...prev])
+    } catch (err) {
+      console.error('Failed to create note', err)
+    }
   }
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getAllNotes()
+        setNotes(data)
+      } catch (err) {
+        console.error('Failed to load notes', err)
+      }
+    }
+
+    load()
+  }, [])
 
   return (
     <div className="app-container">

@@ -60,6 +60,17 @@ router.get('/session/:sessionId', async (req, res) => {
   }
 });
 
+// Count today's notes
+router.get('/count/today', async (req, res) => {
+  try {
+    const count = await Note.countToday();
+    res.json({ count });
+  } catch (error) {
+    console.error('Error counting notes:', error);
+    res.status(500).json({ error: 'Failed to count notes' });
+  }
+});
+
 // Get single note
 router.get('/:id', async (req, res) => {
   try {
@@ -109,17 +120,6 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting note:', error);
     res.status(500).json({ error: 'Failed to delete note' });
-  }
-});
-
-// Count today's notes
-router.get('/count/today', async (req, res) => {
-  try {
-    const count = await Note.countToday();
-    res.json({ count });
-  } catch (error) {
-    console.error('Error counting notes:', error);
-    res.status(500).json({ error: 'Failed to count notes' });
   }
 });
 

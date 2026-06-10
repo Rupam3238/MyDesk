@@ -16,12 +16,12 @@ export default function NotesPanel({ notes, onAddNote }) {
       <div className="notes-body">
         {notes.map(note => (
           <div key={note.id} className="n-card">
-            <i className={`ti ti-pin n-pin`} style={{ color: `var(--${note.color})` }}></i>
+            <i className={`ti ti-pin n-pin`} style={{ color: `var(--${note.color || 'purple'})` }}></i>
             <div>
-              <div className="n-text">{note.text}</div>
-              {note.tags.length > 0 && (
+              <div className="n-text">{note.content || note.text}</div>
+              {(note.tags || []).length > 0 && (
                 <div className="n-tags">
-                  {note.tags.map(tag => (
+                  {(note.tags || []).map(tag => (
                     <span key={tag} className="n-tag">{tag}</span>
                   ))}
                 </div>
