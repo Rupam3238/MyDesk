@@ -1,8 +1,4 @@
-import StatCard from './StatCard'
-import SessionTimer from './SessionTimer'
-import NotesPanel from './NotesPanel'
-import HabitsTracker from './HabitsTracker'
-import Quick from './quick';
+import { StatCard, SessionTimer, NotesPanel, HabitsTracker, Quick } from './features'
 
 export default function Dashboard({ mode, notes, onAddNote, onDeleteNote }) {
   return (

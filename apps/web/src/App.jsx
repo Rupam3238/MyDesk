@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
-import './App.css'
+import './styles/global.css'
 
-import TopBar from './components/TopBar'
-import Sidebar from './components/Sidebar'
-import ModeBar from './components/ModeBar'
+import { ModeBar } from './components/layout'
+import MainLayout from './components/layout/MainLayout'
 import Dashboard from './components/Dashboard'
 import TimerPage from './pages/TimerPage'
 
@@ -70,13 +69,8 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-container">
-        <TopBar theme={theme} onToggleTheme={toggleTheme} />
-
-        <div className="layout">
-          <Sidebar />
-
-          <main className="main">
-            <Routes>
+        <MainLayout>
+          <Routes>
 
               {/* DASHBOARD */}
               <Route
@@ -101,8 +95,7 @@ function App() {
               />
 
             </Routes>
-          </main>
-        </div>
+        </MainLayout>
       </div>
     </BrowserRouter>
   )

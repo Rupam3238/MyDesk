@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import SessionModal from './SessionModal'
-import '../styles/SessionTimer.css'
-import { calculateElapsed } from '../utils/calculateElapsed'
+import '../../styles/SessionTimer.css'
+import { calculateElapsed } from '../../utils/calculateElapsed'
 
 export default function SessionTimer() {
   const [sessionData, setSessionData] = useState(null)
@@ -14,6 +14,8 @@ export default function SessionTimer() {
   const [earlierSessions, setEarlierSessions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const alertPlayedRef = useRef(false)
+  const audioCtxRef = useRef(null)
 
   // Initialize: Check for active session or show modal
   useEffect(() => {
@@ -85,6 +87,13 @@ export default function SessionTimer() {
     setCompleted(false)
     setFocusScore(null)
     setError('')
+    // reset alarm state and prime audio on explicit user action
+    alertPlayedRef.current = false
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext
+      if (!audioCtxRef.current) audioCtxRef.current = new AudioContext()
+      if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume().catch(() => {})
+    } catch (e) {}
   }
 
   // Timer interval
@@ -235,6 +244,38 @@ export default function SessionTimer() {
         100
       )
     : 0
+
+  // play alarm when elapsed exactly equals planned duration (once)
+  const playAlarm = () => {
+    if (typeof window === 'undefined') return
+
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext
+      if (!audioCtxRef.current) audioCtxRef.current = new AudioContext()
+      const audioCtx = audioCtxRef.current
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {})
+
+      const oscillator = audioCtx.createOscillator()
+      const gain = audioCtx.createGain()
+      oscillator.type = 'sine'
+      oscillator.frequency.value = 880
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime)
+      oscillator.connect(gain)
+      gain.connect(audioCtx.destination)
+      oscillator.start()
+      oscillator.stop(audioCtx.currentTime + 1)
+    } catch (err) {
+      console.warn('playAlarm error', err)
+    }
+  }
+
+  useEffect(() => {
+    if (!sessionData || alertPlayedRef.current || completed) return
+    if (elapsedSecs === sessionData.planned_duration) {
+      playAlarm()
+      alertPlayedRef.current = true
+    }
+  }, [elapsedSecs, sessionData, completed])
 
 if (!sessionData) {
   return (

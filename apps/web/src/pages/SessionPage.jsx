@@ -1,5 +1,4 @@
-import SessionTimer from '../components/SessionTimer'
-import NotesPanel from '../components/NotesPanel'
+import { SessionTimer, NotesPanel } from '../components/features'
 
 export default function SessionPage() {
   return (

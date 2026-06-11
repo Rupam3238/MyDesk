@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { categories } from '../../../../packages/src/categories'
+import { categories } from '../../../../../packages/src/categories'
 
 // props: notes, onAddNote, onDeleteNote
 

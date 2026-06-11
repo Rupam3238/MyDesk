@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import SessionTimer from "../components/SessionTimer"
-import NotesPanel from "../components/NotesPanel"
+import { SessionTimer, NotesPanel } from "../components/features"
 import { getAllNotes, createNote, deleteNote } from '../api/notes'
 import '../styles/TimerPage.css'
 

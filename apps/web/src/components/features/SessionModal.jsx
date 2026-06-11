@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../styles/SessionModal.css';
+import '../../styles/SessionModal.css';
 
 export default function SessionModal({ onSessionCreate, isOpen, onClose }) {
   const [topic, setTopic] = useState('');
