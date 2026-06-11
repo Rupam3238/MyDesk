@@ -439,7 +439,7 @@ return (
         {error && <div className="error-message">{error}</div>}
 
         {/* Earlier Today Section */}
-        {earlierSessions.length > 0 && (
+        {earlierSessions.length > 0 && (!sessionData || completed) && (
           <div className="slog">
             <div className="slog-label">earlier today</div>
             {earlierSessions.slice(0, 3).map(session => (
