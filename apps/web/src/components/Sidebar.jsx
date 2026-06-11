@@ -1,71 +1,105 @@
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 
 export default function Sidebar() {
-  const [activeNav, setActiveNav] = useState('dashboard')
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [collapsed, setCollapsed] = useState(false)
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'ti-layout-dashboard' },
-    { id: 'timer', label: 'Study Timer', icon: 'ti-clock', badge: '2h 14m' },
-    { id: 'notes', label: 'Notes', icon: 'ti-notes', badge: '12' },
-    { id: 'habits', label: 'Habits', icon: 'ti-checklist' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'ti-layout-dashboard', path: '/' },
+    { id: 'timer', label: 'Timer', icon: 'ti-clock', badge: '2h 14m', path: '/timer' },
+    { id: 'notes', label: 'Notes', icon: 'ti-notes', badge: '12', path: '/notes' },
+    { id: 'habits', label: 'Habits', icon: 'ti-checklist', path: '/habits' },
   ]
 
   const toolItems = [
-    { id: 'analytics', label: 'Analytics', icon: 'ti-chart-bar' },
-    { id: 'launch', label: 'Quick Launch', icon: 'ti-rocket' },
-    { id: 'reminders', label: 'Reminders', icon: 'ti-bell', badgeAlert: true, badge: '3' },
+    { id: 'analytics', label: 'Analytics', icon: 'ti-chart-bar', path: '/analytics' },
+    { id: 'launch', label: 'Quick Launch', icon: 'ti-rocket', path: '/launch' },
+    { id: 'reminders', label: 'Reminders', icon: 'ti-bell', badgeAlert: true, badge: '3', path: '/reminders' },
   ]
 
+  const isActive = (path) => location.pathname === path
+
+  const go = (path) => navigate(path)
+
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <nav className="sidebar-nav">
-        <div className="s-label">workspace</div>
+
+        <div style={{display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px 4px'}}>
+          <button className="sidebar-toggle" onClick={() => setCollapsed(!collapsed)} aria-label="Toggle sidebar">
+            <i className="ti ti-menu"></i>
+          </button>
+          <div className="s-label">workspace</div>
+        </div>
+
         {navItems.map(item => (
           <a
             key={item.id}
             href="#"
-            className={`n-item ${activeNav === item.id ? 'active' : ''}`}
+            className={`n-item ${isActive(item.path) ? 'active' : ''}`}
             onClick={(e) => {
               e.preventDefault()
-              setActiveNav(item.id)
+              go(item.path)
             }}
           >
             <i className={`ti ${item.icon}`}></i>
-            {item.label}
-            {item.badge && <span className={`n-badge ${item.badgeAlert ? 'alert' : ''}`}>{item.badge}</span>}
+            <span className="n-label">{item.label}</span>
+
+            {item.badge && (
+              <span className={`n-badge ${item.badgeAlert ? 'alert' : ''}`}>
+                {item.badge}
+              </span>
+            )}
           </a>
         ))}
 
         <div className="s-label">tools</div>
+
         {toolItems.map(item => (
           <a
             key={item.id}
             href="#"
-            className={`n-item ${activeNav === item.id ? 'active' : ''}`}
+            className={`n-item ${isActive(item.path) ? 'active' : ''}`}
             onClick={(e) => {
               e.preventDefault()
-              setActiveNav(item.id)
+              go(item.path)
             }}
           >
             <i className={`ti ${item.icon}`}></i>
-            {item.label}
-            {item.badge && <span className={`n-badge ${item.badgeAlert ? 'alert' : ''}`}>{item.badge}</span>}
+            <span className="n-label">{item.label}</span>
+
+            {item.badge && (
+              <span className={`n-badge ${item.badgeAlert ? 'alert' : ''}`}>
+                {item.badge}
+              </span>
+            )}
           </a>
         ))}
 
         <div className="s-label">system</div>
-        <a href="#" className={`n-item ${activeNav === 'settings' ? 'active' : ''}`} onClick={(e) => {
-          e.preventDefault()
-          setActiveNav('settings')
-        }}>
-          <i className="ti ti-settings"></i>Settings
+
+        <a
+          href="#"
+          className={`n-item ${isActive('/settings') ? 'active' : ''}`}
+          onClick={(e) => {
+            e.preventDefault()
+            go('/settings')
+          }}
+        >
+          <i className="ti ti-settings"></i>
+          <span className="n-label">Settings</span>
         </a>
+
       </nav>
 
       <div className="sidebar-footer">
         <div className="sf-label">today's focus</div>
         <div className="sf-topic">React fundamentals</div>
-        <div className="pbar-bg"><div className="pbar-fill" style={{ width: '62%' }}></div></div>
+        <div className="pbar-bg">
+          <div className="pbar-fill" style={{ width: '62%' }}></div>
+        </div>
         <div className="sf-pct">62% of daily goal</div>
       </div>
     </aside>

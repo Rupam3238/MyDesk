@@ -28,27 +28,20 @@ export default function NotesPanel({ notes, onAddNote, onDeleteNote }) {
   return (
     <div className="card">
       <div className="card-header">
-        <div className="card-title"><i className="ti ti-notes"></i>Quick Notes</div>
-      </div>
-      <div className="notes-body">
-        {/* Input Controls */}
-        <div className="notes-controls">
-          <div className="input-group">
-            <select className="notes-select" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
+        <div className="card-title">
+          <i className="ti ti-notes"></i>
+          <select className="notes-select" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
               <option>All</option>
               {categories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
-            </select>
-            <input
-              className="notes-input"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="What's on your mind..."
-            />
-          </div>
+          </select>
+          Notes
         </div>
+        
+      </div>
+      <div className="notes-body">
+        
 
         {/* Notes List */}
         <div className="notes-list">
@@ -87,6 +80,22 @@ export default function NotesPanel({ notes, onAddNote, onDeleteNote }) {
             ))
           )}
         </div>
+
+        {/* Input Controls */}
+        <div className="notes-controls">
+          <div className="input-group">
+            
+            <input
+              className="notes-input"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="What's on your mind..."
+            />
+          </div>
+        </div>
+
+
         {deleteCandidate && (
           <div className="delete-confirm">
             <div>Delete this note?</div>

@@ -120,7 +120,7 @@ export default function SessionModal({ onSessionCreate, isOpen, onClose }) {
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., Calculus, Chess Openings"
+              placeholder="e.g., Math, Chess Openings"
               className="form-input"
               disabled={loading}
             />

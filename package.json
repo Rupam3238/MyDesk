@@ -8,5 +8,8 @@
     "dev:web": "npm run dev --workspace=mydesk",
     "dev:server": "npm run dev --workspace=mydesk-server",
     "dev": "concurrently \"npm run dev:web\" \"npm run dev:server\""
+  },
+  "dependencies": {
+    "react-router-dom": "^7.17.0"
   }
 }
