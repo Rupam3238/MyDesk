@@ -3,7 +3,7 @@ import './styles/global.css'
 
 import { ModeBar } from './components/layout'
 import MainLayout from './components/layout/MainLayout'
-import Dashboard from './components/Dashboard'
+import Dashboard from './pages/Dashboard'
 import TimerPage from './pages/TimerPage'
 
 import { getAllNotes, createNote, deleteNote } from './api'
