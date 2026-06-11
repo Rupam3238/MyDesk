@@ -107,7 +107,7 @@
   pointer-events: none;
 }
 
-.notes-sidebar .card {
+/* .notes-sidebar .card {
   margin: 0;
   border: none;
   border-radius: 0;
@@ -115,24 +115,26 @@
   height: calc(100% - 52px);
   display: flex;
   flex-direction: column;
-}
+} */
 
-.notes-sidebar .card-header {
+/* .notes-sidebar .card-header {
   background: var(--surface2);
   border-bottom: 1px solid var(--surface3);
   padding: 16px;
   position: sticky;
   top: 0;
   z-index: 10;
-}
+} */
 
-.notes-sidebar .notes-body {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-}
+  /* .notes-sidebar .notes-body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+  } */
+
+
 
 /* Resizer bar (left edge of the notes panel) */
 .notes-resizer {

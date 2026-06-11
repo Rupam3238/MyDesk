@@ -17,15 +17,15 @@ export default function Sidebar() {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'ti-layout-dashboard', path: '/' },
-    { id: 'timer', label: 'Timer', icon: 'ti-clock', badge: '2h 14m', path: '/timer' },
-    { id: 'notes', label: 'Notes', icon: 'ti-notes', badge: '12', path: '/notes' },
+    { id: 'timer', label: 'Timer', icon: 'ti-clock', badge: '', path: '/timer' },
+    { id: 'notes', label: 'Notes', icon: 'ti-notes', badge: '', path: '/notes' },
     { id: 'habits', label: 'Habits', icon: 'ti-checklist', path: '/habits' },
   ]
 
   const toolItems = [
     { id: 'analytics', label: 'Analytics', icon: 'ti-chart-bar', path: '/analytics' },
     { id: 'launch', label: 'Quick Launch', icon: 'ti-rocket', path: '/launch' },
-    { id: 'reminders', label: 'Reminders', icon: 'ti-bell', badgeAlert: true, badge: '3', path: '/reminders' },
+    { id: 'reminders', label: 'Reminders', icon: 'ti-bell', badgeAlert: true, badge: '', path: '/reminders' },
   ]
 
   const isActive = (path) => location.pathname === path
