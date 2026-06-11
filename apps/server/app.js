@@ -1,8 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import sessionsRouter from './routes/sessions.js';
-import notesRouter from './routes/notes.js';
-import habitsRouter from './routes/habits.js';
+import { setupRoutes } from './routes/index.js';
 
 const app = express();
 
@@ -22,9 +20,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/sessions', sessionsRouter);
-app.use('/api/notes', notesRouter);
-app.use('/api/habits', habitsRouter);
+setupRoutes(app);
 
 // 404 handler
 app.use((req, res) => {
