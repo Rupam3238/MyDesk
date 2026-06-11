@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react"
 import SessionTimer from "../components/SessionTimer"
 import NotesPanel from "../components/NotesPanel"
 import { getAllNotes, createNote, deleteNote } from '../api/notes'
-import './TimerPage.css'
+import '../styles/TimerPage.css'
 
+// Layout limits for the floating notes panel.
 const BOUNDS = {
   minWidth: 280,
   maxWidth: 720,
@@ -14,6 +15,8 @@ const BOUNDS = {
 
 export default function TimerPage() {
   const initialHeight = Math.min(0.72 * window.innerHeight, 560)
+
+  // Floating panel state.
   const [notesCollapsed, setNotesCollapsed] = useState(false)
   const [notesWidth, setNotesWidth] = useState(420)
   const [notesHeight, setNotesHeight] = useState(initialHeight)
@@ -21,10 +24,15 @@ export default function TimerPage() {
     top: Math.round(Math.max(BOUNDS.margin, Math.min((window.innerHeight - initialHeight) / 2, window.innerHeight - initialHeight - BOUNDS.margin))),
     right: 20,
   })
+
+  // Notes content state.
   const [notes, setNotes] = useState([])
+
+  // Interaction flags used for styling and cursor state.
   const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
 
+  // Refs hold the latest state during mousemove callbacks.
   const panelPosRef = useRef(panelPos)
   const widthRef = useRef(notesWidth)
   const heightRef = useRef(notesHeight)
@@ -50,6 +58,7 @@ export default function TimerPage() {
     collapsedRef.current = notesCollapsed
   }, [notesCollapsed])
 
+  // Ensure panel top/right stay inside the viewport.
   const clampPanel = (top, right, width, height) => {
     const maxTop = window.innerHeight - height - BOUNDS.margin
     const maxRight = window.innerWidth - width - BOUNDS.margin
@@ -60,6 +69,7 @@ export default function TimerPage() {
     }
   }
 
+  // Batch DOM updates during drag/resize to avoid too many React renders.
   const scheduleUpdate = (update) => {
     pendingRef.current = { ...pendingRef.current, ...update }
     if (rafRef.current) return
@@ -75,6 +85,7 @@ export default function TimerPage() {
     })
   }
 
+  // Begin dragging the panel by tracking the starting pointer position.
   const startDragging = (event) => {
     if (event.button !== 0) return
     event.preventDefault()
@@ -91,6 +102,7 @@ export default function TimerPage() {
     document.body.style.cursor = 'grabbing'
   }
 
+  // Begin resizing the panel along the left edge or bottom-left corner.
   const startResizing = (mode) => (event) => {
     if (event.button !== 0) return
     event.preventDefault()
@@ -108,6 +120,7 @@ export default function TimerPage() {
     document.body.style.cursor = mode === 'both' ? 'nwse-resize' : 'ew-resize'
   }
 
+  // Reset dragging/resizing state and restore cursor styles.
   const stopInteraction = () => {
     dragRef.current = null
     resizeRef.current = null
@@ -117,6 +130,7 @@ export default function TimerPage() {
     document.body.style.cursor = ''
   }
 
+  // Global mousemove listener for drag and resize operations.
   useEffect(() => {
     const onMouseMove = (event) => {
       if (dragRef.current) {
@@ -163,6 +177,7 @@ export default function TimerPage() {
     setNotesCollapsed((prev) => !prev)
   }
 
+  // Create a new note and append it to local state.
   const addNote = async (text, category = null) => {
     if (!text.trim()) return
 
@@ -180,6 +195,7 @@ export default function TimerPage() {
     }
   }
 
+  // Delete a note from the backend and update the local list.
   const onDeleteNote = async (id) => {
     try {
       await deleteNote(id)
@@ -189,6 +205,7 @@ export default function TimerPage() {
     }
   }
 
+  // Load existing notes once when the timer page mounts.
   useEffect(() => {
     const load = async () => {
       try {
