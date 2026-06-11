@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CATEGORIES } from '../../utils/constants.js'
+import { CATEGORIES } from '../../../utils/constants.js'
 
 // props: notes, onAddNote, onDeleteNote
 

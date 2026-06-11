@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import SessionModal from './SessionModal'
-import '../../styles/SessionTimer.css'
-import { calculateElapsed } from '../../utils/calculateElapsed'
+import '../../../styles/SessionTimer.css'
+import { calculateElapsed } from '../../../utils/calculateElapsed'
 
 export default function SessionTimer() {
   const [sessionData, setSessionData] = useState(null)

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import '../../styles/SessionModal.css';
-import { CATEGORIES } from '../../utils/constants.js';
-import { PRESET_DURATIONS } from '../../utils/constants.js'
+import '../../../styles/SessionModal.css';
+import { CATEGORIES } from '../../../utils/constants.js';
+import { PRESET_DURATIONS } from '../../../utils/constants.js'
 
 
 export default function SessionModal({ onSessionCreate, isOpen, onClose }) {
