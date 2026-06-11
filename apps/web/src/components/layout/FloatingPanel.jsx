@@ -120,6 +120,10 @@ export default function FloatingPanel({ children }) {
     document.body.style.cursor = ''
   }
 
+  const toggleCollapse = () => {
+    setNotesCollapsed((prev) => !prev)
+  }
+
   useEffect(() => {
     const onMouseMove = (event) => {
       if (dragRef.current) {
@@ -179,6 +183,17 @@ export default function FloatingPanel({ children }) {
     >
       <div className="notes-header" onMouseDown={startDragging} title="Drag to move">
         <span className="notes-header-label">Notes</span>
+        <button
+          className="notes-toggle-btn"
+          onClick={(event) => {
+            event.stopPropagation()
+            toggleCollapse()
+          }}
+          onMouseDown={(event) => event.stopPropagation()}
+          title={notesCollapsed ? 'Expand notes' : 'Collapse notes'}
+        >
+          <i className={`ti ${notesCollapsed ? 'ti-plus' : 'ti-minus'}`} />
+        </button>
       </div>
 
       <div className="notes-panel-content">
