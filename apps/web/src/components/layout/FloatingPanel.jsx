@@ -9,7 +9,7 @@ const BOUNDS = {
   margin: 16,
 }
 
-export default function FloatingPanel() {
+export default function FloatingPanel({ children }) {
   const initialHeight = Math.min(0.72 * window.innerHeight, 560)
 
   const [notesCollapsed, setNotesCollapsed] = useState(true)
@@ -120,5 +120,73 @@ export default function FloatingPanel() {
     document.body.style.cursor = ''
   }
 
-  return null
+  useEffect(() => {
+    const onMouseMove = (event) => {
+      if (dragRef.current) {
+        const deltaX = event.clientX - dragRef.current.startX
+        const deltaY = event.clientY - dragRef.current.startY
+        const width = collapsedRef.current ? 96 : widthRef.current
+        const height = collapsedRef.current ? 52 : heightRef.current
+        const nextPos = clampPanel(
+          dragRef.current.startTop + deltaY,
+          dragRef.current.startRight - deltaX,
+          width,
+          height
+        )
+        scheduleUpdate({ panelPos: nextPos })
+      }
+
+      if (resizeRef.current) {
+        const deltaX = resizeRef.current.startX - event.clientX
+        const nextWidth = Math.min(BOUNDS.maxWidth, Math.max(BOUNDS.minWidth, resizeRef.current.startWidth + deltaX))
+        let nextHeight = resizeRef.current.startHeight
+
+        if (resizeRef.current.mode === 'both') {
+          const deltaY = event.clientY - resizeRef.current.startY
+          nextHeight = Math.min(BOUNDS.maxHeight, Math.max(BOUNDS.minHeight, resizeRef.current.startHeight + deltaY))
+        }
+
+        scheduleUpdate({ notesWidth: nextWidth, notesHeight: nextHeight })
+      }
+    }
+
+    const onMouseUp = () => {
+      if (dragRef.current || resizeRef.current) {
+        stopInteraction()
+      }
+    }
+
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    window.addEventListener('mouseleave', onMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+      window.removeEventListener('mouseleave', onMouseUp)
+    }
+  }, [])
+
+  return (
+    <div
+      className={`notes-sidebar ${notesCollapsed ? 'collapsed' : ''} ${isDragging ? 'dragging' : ''} ${isResizing ? 'resizing' : ''}`}
+      style={{
+        width: notesCollapsed ? 96 : notesWidth,
+        height: notesCollapsed ? 52 : notesHeight,
+        top: `${panelPos.top}px`,
+        right: `${panelPos.right}px`,
+      }}
+    >
+      <div className="notes-header" onMouseDown={startDragging} title="Drag to move">
+        <span className="notes-header-label">Notes</span>
+      </div>
+
+      <div className="notes-panel-content">
+        {children}
+      </div>
+
+      <div className="notes-resizer" onMouseDown={startResizing('width')} title="Drag to resize width" />
+      <div className="notes-corner-resizer" onMouseDown={startResizing('both')} title="Drag corner to resize width and height" />
+    </div>
+  )
 }
