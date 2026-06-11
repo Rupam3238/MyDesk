@@ -1,10 +1,19 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
+
+  // Auto-collapse sidebar on Timer page, expand on all other pages
+  useEffect(() => {
+    if (location.pathname === '/timer') {
+      setCollapsed(true)
+    } else {
+      setCollapsed(false)
+    }
+  }, [location.pathname])
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'ti-layout-dashboard', path: '/' },
