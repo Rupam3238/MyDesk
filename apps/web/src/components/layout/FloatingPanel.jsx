@@ -12,7 +12,6 @@ export default function FloatingPanel({ children }) {
       className={`notes-sidebar-fixed ${notesCollapsed ? 'collapsed' : ''}`}
     >
       <div className="notes-header-fixed" title="Notes panel">
-        <i className="ti ti-chevron-down notes-dropdown-icon"></i>
         <span className="notes-header-label">Notes</span>
         <button
           className="notes-toggle-btn-fixed"
