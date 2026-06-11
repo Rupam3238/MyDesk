@@ -53,5 +53,72 @@ export default function FloatingPanel() {
     collapsedRef.current = notesCollapsed
   }, [notesCollapsed])
 
+  const clampPanel = (top, right, width, height) => {
+    const maxTop = window.innerHeight - height - BOUNDS.margin
+    const maxRight = window.innerWidth - width - BOUNDS.margin
+
+    return {
+      top: Math.round(Math.min(Math.max(top, BOUNDS.margin), Math.max(maxTop, BOUNDS.margin))),
+      right: Math.round(Math.min(Math.max(right, BOUNDS.margin), Math.max(maxRight, BOUNDS.margin))),
+    }
+  }
+
+  const scheduleUpdate = (update) => {
+    pendingRef.current = { ...pendingRef.current, ...update }
+    if (rafRef.current) return
+
+    rafRef.current = window.requestAnimationFrame(() => {
+      const next = pendingRef.current || {}
+      pendingRef.current = null
+      rafRef.current = null
+
+      if (next.panelPos) setPanelPos(next.panelPos)
+      if (next.notesWidth !== undefined) setNotesWidth(next.notesWidth)
+      if (next.notesHeight !== undefined) setNotesHeight(next.notesHeight)
+    })
+  }
+
+  const startDragging = (event) => {
+    if (event.button !== 0) return
+    event.preventDefault()
+
+    dragRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      startTop: panelPosRef.current.top,
+      startRight: panelPosRef.current.right,
+    }
+
+    setIsDragging(true)
+    document.body.style.userSelect = 'none'
+    document.body.style.cursor = 'grabbing'
+  }
+
+  const startResizing = (mode) => (event) => {
+    if (event.button !== 0) return
+    event.preventDefault()
+
+    resizeRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      startWidth: widthRef.current,
+      startHeight: heightRef.current,
+      mode,
+    }
+
+    setIsResizing(true)
+    document.body.style.userSelect = 'none'
+    document.body.style.cursor = mode === 'both' ? 'nwse-resize' : 'ew-resize'
+  }
+
+  const stopInteraction = () => {
+    dragRef.current = null
+    resizeRef.current = null
+    setIsDragging(false)
+    setIsResizing(false)
+    document.body.style.userSelect = ''
+    document.body.style.cursor = ''
+  }
+
   return null
 }
