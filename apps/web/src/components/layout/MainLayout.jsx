@@ -5,11 +5,9 @@ export default function MainLayout({ children }) {
   return (
     <div className="app-root">
       <TopBar />
-      <div className="app-body" style={{ display: 'flex' }}>
-        <aside style={{ width: 210 }}>
-          <Sidebar />
-        </aside>
-        <main style={{ flex: 1, padding: 16 }}>
+      <div className="layout">
+        <Sidebar />
+        <main className="main" style={{ padding: 16 }}>
           {children}
         </main>
       </div>
