@@ -1,0 +1,12 @@
+{
+  "name": "desktop",
+  "version": "1.0.0",
+  "main": "main.cjs",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "npx electron ."
+  },
+  "devDependencies": {
+    "electron": "^latest"
+  }
+}

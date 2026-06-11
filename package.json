@@ -6,6 +6,7 @@
   ],
   "scripts": {
     "dev:web": "npm run dev --workspace=mydesk",
+    "dev:desktop": "npm run dev --prefix apps/desktop",
     "dev:server": "npm run dev --workspace=mydesk-server",
     "dev": "concurrently \"npm run dev:web\" \"npm run dev:server\""
   },
