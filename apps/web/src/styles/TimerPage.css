@@ -28,57 +28,60 @@
   flex-direction: column;
 }
 
-.notes-sidebar {
-  background: var(--surface2);
-  border: 1px solid var(--surface3);
+/* ── Fixed Notes Sidebar (Top Right) ── */
+.notes-sidebar-fixed {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 320px;
+  max-height: 600px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  transition: width 0.2s ease, height 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   overflow: hidden;
-  position: fixed;
   z-index: 999;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+  transition: width 0.2s ease, max-height 0.2s ease;
 }
 
-.notes-sidebar.collapsed {
+.notes-sidebar-fixed.collapsed {
   width: 280px;
-  height: 52px;
+  max-height: 52px;
 }
 
-.notes-header {
+/* ── Header ── */
+.notes-header-fixed {
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-height: 52px;
   padding: 0 14px;
   gap: 10px;
-  background: var(--surface2);
-  cursor: grab;
-  border-bottom: 1px solid var(--surface3);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-.notes-sidebar.dragging .notes-header,
-.notes-sidebar.resizing .notes-header {
-  cursor: grabbing;
+.notes-dropdown-icon {
+  font-size: 12px;
+  color: var(--text3);
+  flex-shrink: 0;
 }
 
 .notes-header-label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.02em;
+  flex: 1;
 }
 
-.notes-sidebar.collapsed .notes-header-label {
-  opacity: 1;
-  width: auto;
-}
-
-.notes-toggle-btn {
+.notes-toggle-btn-fixed {
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -87,94 +90,185 @@
   border-radius: 50%;
   cursor: pointer;
   color: white;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  font-size: 16px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease, background 0.2s ease;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(127, 119, 221, 0.25);
 }
 
-.notes-toggle-btn:hover {
+.notes-toggle-btn-fixed:hover {
   transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(127, 119, 221, 0.35);
 }
 
-.notes-panel-content {
+.notes-toggle-btn-fixed:active {
+  transform: scale(0.95);
+}
+
+/* ── Content ── */
+.notes-panel-content-fixed {
   flex: 1;
   opacity: 1;
   transition: opacity 0.2s ease;
+  overflow: hidden;
 }
 
-.notes-sidebar.collapsed .notes-panel-content {
+.notes-sidebar-fixed.collapsed .notes-panel-content-fixed {
   opacity: 0;
   pointer-events: none;
 }
 
-/* .notes-sidebar .card {
+/* ── NotesPanel Card Styling Inside ── */
+.notes-sidebar-fixed .card {
   margin: 0;
   border: none;
   border-radius: 0;
   background: transparent;
-  height: calc(100% - 52px);
+  height: 100%;
   display: flex;
   flex-direction: column;
-} */
-
-/* .notes-sidebar .card-header {
-  background: var(--surface2);
-  border-bottom: 1px solid var(--surface3);
-  padding: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-} */
-
-  /* .notes-sidebar .notes-body {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-  } */
-
-
-
-/* Resizer bar (left edge of the notes panel) */
-.notes-resizer {
-  position: absolute;
-  left: -8px;
-  top: 0;
-  bottom: 0;
-  width: 10px;
-  cursor: ew-resize;
-  z-index: 1001;
+  box-shadow: none;
 }
 
-.notes-sidebar.collapsed .notes-resizer {
-  display: none;
+.notes-sidebar-fixed .card-header {
+  background: var(--surface);
+  border-bottom: none;
+  padding: 0;
+  position: static;
+  z-index: auto;
 }
 
-/* Corner resizer at bottom-left to resize both dimensions */
-.notes-corner-resizer {
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 16px;
-  height: 16px;
-  cursor: nwse-resize;
-  z-index: 1002;
-}
-
-.notes-sidebar.collapsed .notes-corner-resizer {
-  display: none;
-}
-
-.notes-sidebar .notes-list {
+.notes-sidebar-fixed .notes-body {
   flex: 1;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: var(--surface);
 }
 
-.notes-sidebar .notes-controls {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid var(--surface3);
+.notes-sidebar-fixed .notes-controls {
+  margin: 0;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.notes-sidebar-fixed .notes-select {
+  font-size: 10px;
+  max-width: 100%;
+}
+
+.notes-sidebar-fixed .notes-input {
+  font-size: 11px;
+  padding: 6px 10px;
+}
+
+.notes-sidebar-fixed .notes-list {
+  flex: 1;
+  overflow-y: auto;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.notes-sidebar-fixed .n-card {
+  background: var(--surface2);
+  padding: 8px 9px;
+  gap: 7px;
+}
+
+.notes-sidebar-fixed .n-text {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.notes-sidebar-fixed .n-category {
+  font-size: 8px;
+}
+
+.notes-sidebar-fixed .n-tag {
+  font-size: 8px;
+  padding: 2px 6px;
+}
+
+.notes-sidebar-fixed .n-pin {
+  font-size: 12px;
+}
+
+.notes-sidebar-fixed .n-delete {
+  padding: 4px;
+  margin-left: 6px;
+}
+
+.notes-sidebar-fixed .n-delete i {
+  font-size: 12px;
+}
+
+.notes-sidebar-fixed .delete-confirm {
+  margin: 8px 12px 12px 12px;
+  padding: 8px 10px;
+  font-size: 11px;
+  bottom: auto;
+  position: static;
+}
+
+.notes-sidebar-fixed .notes-empty {
+  padding: 20px;
+  font-size: 11px;
+  gap: 8px;
+}
+
+.notes-sidebar-fixed .notes-empty i {
+  font-size: 28px;
+}
+
+/* ── Scrollbar Styling ── */
+.notes-sidebar-fixed .notes-list::-webkit-scrollbar,
+.notes-sidebar-fixed .notes-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notes-sidebar-fixed .notes-list::-webkit-scrollbar-track,
+.notes-sidebar-fixed .notes-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notes-sidebar-fixed .notes-list::-webkit-scrollbar-thumb,
+.notes-sidebar-fixed .notes-body::-webkit-scrollbar-thumb {
+  background: var(--surface3);
+  border-radius: 3px;
+}
+
+.notes-sidebar-fixed .notes-list::-webkit-scrollbar-thumb:hover,
+.notes-sidebar-fixed .notes-body::-webkit-scrollbar-thumb:hover {
+  background: var(--surface3);
+  opacity: 0.8;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1400px) {
+  .notes-sidebar-fixed {
+    width: 300px;
+    max-height: 550px;
+  }
+
+  .notes-sidebar-fixed.collapsed {
+    width: 260px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .notes-sidebar-fixed {
+    width: 280px;
+    max-height: 500px;
+    top: 12px;
+    right: 12px;
+  }
+
+  .notes-sidebar-fixed.collapsed {
+    width: 240px;
+  }
 }
 
 /* Adjust main content on timer page */
