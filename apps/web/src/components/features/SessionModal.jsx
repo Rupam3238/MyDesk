@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import '../../styles/SessionModal.css';
+import { CATEGORIES } from '../../utils/constants.js';
+import { PRESET_DURATIONS } from '../../utils/constants.js'
+
 
 export default function SessionModal({ onSessionCreate, isOpen, onClose }) {
   const [topic, setTopic] = useState('');
-  const [category, setCategory] = useState('Study');
+  const [category, setCategory] = useState(CATEGORIES[0]);
   const [goal, setGoal] = useState('');
   const [durationPreset, setDurationPreset] = useState(null);
   const [customMinutes, setCustomMinutes] = useState('');
@@ -11,14 +14,9 @@ export default function SessionModal({ onSessionCreate, isOpen, onClose }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const categories = ['Study', 'Coding', 'Chess', 'Flute', 'Reading', 'Break'];
+  const categories = CATEGORIES;
   
-  const presets = [
-    { label: '25m', seconds: 25 * 60 },
-    { label: '50m', seconds: 50 * 60 },
-    { label: '90m', seconds: 90 * 60 },
-    { label: '2h', seconds: 2 * 60 * 60 },
-  ];
+  const presets = PRESET_DURATIONS;
 
   const getDurationInSeconds = () => {
     if (durationPreset !== null) {
