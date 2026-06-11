@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { categories } from '../../../../../packages/src/categories'
+import { CATEGORIES } from '../../utils/constants.js'
 
 // props: notes, onAddNote, onDeleteNote
 
@@ -32,7 +32,7 @@ export default function NotesPanel({ notes, onAddNote, onDeleteNote }) {
           <i className="ti ti-notes"></i>
           <select className="notes-select" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
               <option>All</option>
-              {categories.map(cat => (
+              {CATEGORIES.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
           </select>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { SessionTimer, NotesPanel } from "../components/features"
-import { getAllNotes, createNote, deleteNote } from '../api/notes'
+import { getAllNotes, createNote, deleteNote } from '../api'
 import '../styles/TimerPage.css'
 
 // Layout limits for the floating notes panel.
@@ -16,7 +16,7 @@ export default function TimerPage() {
   const initialHeight = Math.min(0.72 * window.innerHeight, 560)
 
   // Floating panel state.
-  const [notesCollapsed, setNotesCollapsed] = useState(false)
+  const [notesCollapsed, setNotesCollapsed] = useState(true)
   const [notesWidth, setNotesWidth] = useState(420)
   const [notesHeight, setNotesHeight] = useState(initialHeight)
   const [panelPos, setPanelPos] = useState({
